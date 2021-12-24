@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8" />
     <title>Get the Gansett</title>
-    <script src="//cdn.jsdelivr.net/npm/phaser@3.11.0/dist/phaser.js"></script>
+    <!--<script src="//cdn.jsdelivr.net/npm/phaser@3.11.0/dist/phaser.js"></script>-->
+    <script src="//cdn.jsdelivr.net/npm/phaser@3.55.2/dist/phaser.min.js"></script>
     <style type="text/css">
         body {
             margin: 0;
@@ -16,8 +17,16 @@
 
 var config = {
     type: Phaser.AUTO,
-    width: 800,
-    height: 600,
+    // Responsive canvas: https://stackoverflow.com/questions/51518818/how-to-make-canvas-responsive-using-phaser-3
+    scale: {
+        mode: Phaser.Scale.FIT,
+        parent: 'phaser-example',
+        autoCenter: Phaser.Scale.CENTER_BOTH,
+        width: 800,
+        height: 600
+    },
+    //width: 800,
+    //height: 600,
     physics: {
         default: 'arcade',
         arcade: {
@@ -33,8 +42,8 @@ var config = {
 };
 
 var player;
-var stars;
-var bombs;
+var cans;
+var sharks;
 var platforms;
 var cursors;
 var score = 0;
@@ -47,8 +56,8 @@ function preload ()
 {
     this.load.image('sky', 'assets/sky.png');
     this.load.image('ground', 'assets/platform.png');
-    this.load.image('star', 'assets/can.png');
-    this.load.image('bomb', 'assets/shark.png');
+    this.load.image('can', 'assets/can.png');
+    this.load.image('shark', 'assets/shark.png');
     this.load.spritesheet('dude', 'assets/ckdude.png', { frameWidth: 32, frameHeight: 48 });
 }
 
@@ -100,34 +109,34 @@ function create ()
     //  Input Events
     cursors = this.input.keyboard.createCursorKeys();
 
-    //  Some stars to collect, 12 in total, evenly spaced 70 pixels apart along the x axis
-    stars = this.physics.add.group({
-        key: 'star',
+    //  Some cans to collect, 12 in total, evenly spaced 70 pixels apart along the x axis
+    cans = this.physics.add.group({
+        key: 'can',
         repeat: 11,
         setXY: { x: 12, y: 0, stepX: 70 }
     });
 
-    stars.children.iterate(function (child) {
+    cans.children.iterate(function (child) {
 
-        //  Give each star a slightly different bounce
+        //  Give each can a slightly different bounce
         child.setBounceY(Phaser.Math.FloatBetween(0.4, 0.8));
 
     });
 
-    bombs = this.physics.add.group();
+    sharks = this.physics.add.group();
 
     //  The score
     scoreText = this.add.text(16, 16, 'Gansetts: 0', { fontSize: '32px', fill: '#000' });
 
-    //  Collide the player and the stars with the platforms
+    //  Collide the player and the cans with the platforms
     this.physics.add.collider(player, platforms);
-    this.physics.add.collider(stars, platforms);
-    this.physics.add.collider(bombs, platforms);
+    this.physics.add.collider(cans, platforms);
+    this.physics.add.collider(sharks, platforms);
 
-    //  Checks to see if the player overlaps with any of the stars, if he does call the collectStar function
-    this.physics.add.overlap(player, stars, collectStar, null, this);
+    //  Checks to see if the player overlaps with any of the cans, if he does call the collectCan function
+    this.physics.add.overlap(player, cans, collectCan, null, this);
 
-    this.physics.add.collider(player, bombs, hitBomb, null, this);
+    this.physics.add.collider(player, sharks, hitshark, null, this);
 }
 
 function update ()
@@ -162,18 +171,18 @@ function update ()
     }
 }
 
-function collectStar (player, star)
+function collectCan (player, can)
 {
-    star.disableBody(true, true);
+    can.disableBody(true, true);
 
     //  Add and update the score
     score += 10;
     scoreText.setText('Gansetts: ' + score);
 
-    if (stars.countActive(true) === 0)
+    if (cans.countActive(true) === 0)
     {
-        //  A new batch of stars to collect
-        stars.children.iterate(function (child) {
+        //  A new batch of cans to collect
+        cans.children.iterate(function (child) {
 
             child.enableBody(true, child.x, 0, true, true);
 
@@ -181,16 +190,16 @@ function collectStar (player, star)
 
         var x = (player.x < 400) ? Phaser.Math.Between(400, 800) : Phaser.Math.Between(0, 400);
 
-        var bomb = bombs.create(x, 16, 'bomb');
-        bomb.setBounce(1);
-        bomb.setCollideWorldBounds(true);
-        bomb.setVelocity(Phaser.Math.Between(-200, 200), 20);
-        bomb.allowGravity = false;
+        var shark = sharks.create(x, 16, 'shark');
+        shark.setBounce(1);
+        shark.setCollideWorldBounds(true);
+        shark.setVelocity(Phaser.Math.Between(-200, 200), 20);
+        shark.allowGravity = false;
 
     }
 }
 
-function hitBomb (player, bomb)
+function hitshark (player, shark)
 {
     this.physics.pause();
 
