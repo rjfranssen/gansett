@@ -4,7 +4,7 @@ var config = {
     // Responsive canvas: https://stackoverflow.com/questions/51518818/how-to-make-canvas-responsive-using-phaser-3
     scale: {
         mode: Phaser.Scale.FIT,
-        parent: 'phaser-example',
+        parent: 'phaser-gansett',
         autoCenter: Phaser.Scale.CENTER_BOTH,
         width: 800,
         height: 600
@@ -22,6 +22,7 @@ var config = {
         update: update
     }
 };
+
 
 var player;
 var cans;
@@ -42,12 +43,12 @@ function preload ()
     this.load.image('can', '../assets/can.png');
     this.load.image('shark', '../assets/shark.png');
     this.load.spritesheet('ckdude', '../assets/ckdude.png', { frameWidth: 32, frameHeight: 48 });
+
 }
 
 function create ()
 {
     // Title Image and text
-    this.add.image(400, 300, 'boyz');
     this.add.text(80, 560, 'Game Title: ' + game.config.gameTitle, { font: '16px Courier', fill: '#ffffff' });
 
     //  A simple background for our game
@@ -124,38 +125,7 @@ function create ()
     this.physics.add.overlap(player, cans, collectCan, null, this);
 
     this.physics.add.collider(player, sharks, hitshark, null, this);
-}
 
-function update ()
-{
-    if (gameOver)
-    {
-        return;
-    }
-
-    if (cursors.left.isDown)
-    {
-        player.setVelocityX(-160);
-
-        player.anims.play('left', true);
-    }
-    else if (cursors.right.isDown)
-    {
-        player.setVelocityX(160);
-
-        player.anims.play('right', true);
-    }
-    else
-    {
-        player.setVelocityX(0);
-
-        player.anims.play('turn');
-    }
-
-    if (cursors.up.isDown && player.body.touching.down)
-    {
-        player.setVelocityY(-330);
-    }
 }
 
 function collectCan (player, can)
@@ -193,8 +163,6 @@ function hitshark (player, shark)
     player.setTint(0xff0000);
 
     player.anims.play('turn');
-
-    this.add.image(400, 300, 'boyz');
 
     gameOver = true;
 }
